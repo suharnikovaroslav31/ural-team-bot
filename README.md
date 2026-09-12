@@ -17,17 +17,8 @@ python main.py
 
 Напишите боту `/start`. Порт 8080 больше не используется.
 
-Для PostgreSQL:
-
-```bat
-docker compose up -d
-```
-
-и в `.env`:
-
-```
-DATABASE_URL=postgresql+asyncpg://ural:ural@127.0.0.1:5432/ural_team
-```
+`requirements.txt` — только то, что нужно боту. Веб-панель `panel.py` и PostgreSQL:
+`pip install -r requirements-panel.txt`.
 
 ## Деплой на хостинг
 
