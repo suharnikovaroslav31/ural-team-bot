@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Выводы{% endblock %}
+{% block body %}
+<h1>Заявки на выплату</h1>
+<div class="tabs">
+  <a href="/withdrawals" class="{% if not status %}active{% endif %}">Все</a>
+  <a href="/withdrawals?status=pending" class="{% if status=='pending' %}active{% endif %}">Ожидают</a>
+  <a href="/withdrawals?status=approved" class="{% if status=='approved' %}active{% endif %}">Одобрены</a>
+  <a href="/withdrawals?status=rejected" class="{% if status=='rejected' %}active{% endif %}">Отклонены</a>
+</div>
+<section class="card">
+  <table>
+    <thead><tr><th>#</th><th>Пользователь</th><th>Сумма</th><th>Адрес</th><th>Статус</th><th>Дата</th><th></th></tr></thead>
+    <tbody>
+    {% for w in items %}
+      <tr>
+        <td>{{ w.id }}</td>
+        <td><a href="/users/{{ w.user_id }}">{% if w.username %}@{{ w.username }}{% else %}{{ w.first_name }}{% endif %}</a></td>
+        <td>{{ w.amount | money }} TON</td>
+        <td class="mono">{{ w.address }}</td>
+        <td><span class="tag {{ w.status }}">{{ w.status }}</span></td>
+        <td>{{ w.created_at | dt }}</td>
+        <td class="row-actions">
+          {% if w.status == 'pending' %}
+          <form method="post" action="/withdrawals/{{ w.id }}/decide"><button name="action" value="ok">Ок</button></form>
+          <form method="post" action="/withdrawals/{{ w.id }}/decide"><button class="danger" name="action" value="no">Нет</button></form>
+          {% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% if not items %}<p class="empty">Пусто</p>{% endif %}
+</section>
+{% endblock %}

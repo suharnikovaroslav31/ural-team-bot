@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Сделки{% endblock %}
+{% block body %}
+<h1>Пайплайн сделок</h1>
+<div class="grid-2">
+  <section class="card">
+    <h2>Записать статус</h2>
+    <form method="post" action="/deals" class="stack">
+      <input name="external_id" placeholder="ID сделки" required>
+      <input name="title" placeholder="Название">
+      <select name="status">
+        <option value="pending">pending</option>
+        <option value="success">success</option>
+        <option value="error">error</option>
+      </select>
+      <input name="amount" placeholder="Сумма TON">
+      <input name="user_id" placeholder="Telegram ID сотрудника">
+      <button>Сохранить</button>
+    </form>
+  </section>
+  <section class="card">
+    <h2>Последние</h2>
+    {% for d in items %}
+    <div class="mentor-row">
+      <div>
+        <b>{{ d.external_id }}</b>
+        <span>{{ d.title or '—' }} · {{ d.amount | money }} TON · {{ d.updated_at | dt }}</span>
+      </div>
+      <span class="tag {{ d.status }}">{{ d.status }}</span>
+    </div>
+    {% else %}
+    <p class="empty">Пусто</p>
+    {% endfor %}
+  </section>
+</div>
+{% endblock %}

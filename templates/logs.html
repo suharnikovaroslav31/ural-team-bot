@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Журнал{% endblock %}
+{% block body %}
+<h1>Журнал транзакций</h1>
+<section class="card">
+  <table>
+    <thead><tr><th>#</th><th>Сотрудник</th><th>Тип</th><th>Сумма</th><th>Описание</th><th>Дата</th></tr></thead>
+    <tbody>
+    {% for l in items %}
+      <tr>
+        <td>{{ l.id }}</td>
+        <td>{% if l.user_id %}<a href="/users/{{ l.user_id }}">{{ l.user_id }}</a>{% else %}—{% endif %}</td>
+        <td><span class="tag pending">{{ l.kind }}</span></td>
+        <td>{% if l.amount %}{{ l.amount | money }}{% else %}—{% endif %}</td>
+        <td>{{ l.title }}</td>
+        <td>{{ l.created_at | dt }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% if not items %}<p class="empty">Журнал пуст</p>{% endif %}
+</section>
+{% endblock %}

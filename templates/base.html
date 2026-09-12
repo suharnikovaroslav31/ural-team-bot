@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Ural Team{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Unbounded:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">UT</div>
+        <div>
+          <strong>URAL TEAM</strong>
+          <span>{% if is_admin %}ADMIN PANEL{% else %}EMPLOYEE{% endif %}</span>
+        </div>
+      </div>
+      <nav>
+        {% if is_admin %}
+        <a href="/" class="{% if path == '/' %}active{% endif %}">Обзор</a>
+        <a href="/users" class="{% if path.startswith('/users') %}active{% endif %}">Сотрудники</a>
+        <a href="/tasks" class="{% if path.startswith('/tasks') %}active{% endif %}">Задачи</a>
+        <a href="/withdrawals" class="{% if path.startswith('/withdrawals') %}active{% endif %}">Выплаты</a>
+        <a href="/valuations" class="{% if path.startswith('/valuations') %}active{% endif %}">Оценки NFT</a>
+        <a href="/deals" class="{% if path.startswith('/deals') %}active{% endif %}">Сделки</a>
+        <a href="/logs" class="{% if path.startswith('/logs') %}active{% endif %}">Журнал</a>
+        <a href="/mentors" class="{% if path.startswith('/mentors') %}active{% endif %}">Наставники</a>
+        <a href="/payouts" class="{% if path.startswith('/payouts') %}active{% endif %}">Лента</a>
+        <a href="/broadcast" class="{% if path.startswith('/broadcast') %}active{% endif %}">Рассылка</a>
+        <a href="/settings" class="{% if path.startswith('/settings') %}active{% endif %}">Настройки</a>
+        {% else %}
+        <a href="/me" class="{% if path.startswith('/me') %}active{% endif %}">Кабинет</a>
+        {% endif %}
+      </nav>
+      <a class="logout" href="/logout">Выйти</a>
+    </aside>
+    <main class="content">
+      {% block body %}{% endblock %}
+    </main>
+  </div>
+</body>
+</html>

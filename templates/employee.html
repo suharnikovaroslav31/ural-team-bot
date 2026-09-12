@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Кабинет{% endblock %}
+{% block body %}
+<h1>Личный кабинет</h1>
+<section class="stats">
+  <article><span>Баланс</span><b>{{ user.balance | money }} TON</b></article>
+  <article><span>Ставка</span><b>{{ user.payout_percent | pct }}</b></article>
+  <article><span>В обработке</span><b>{{ pending | money }} TON</b></article>
+  <article><span>Выплачено</span><b>{{ paid | money }} TON</b></article>
+</section>
+<div class="grid-2">
+  <section class="card">
+    <h2>Активные задачи</h2>
+    {% for t in tasks %}
+      {% if t.status != 'done' %}
+      <div class="mentor-row">
+        <div>
+          <b>#{{ t.id }} {{ t.title }}</b>
+          <span>{{ t.description }}</span>
+        </div>
+        <span class="tag {{ t.status }}">{{ t.status }}</span>
+      </div>
+      {% endif %}
+    {% else %}
+    <p class="empty">Нет активных задач</p>
+    {% endfor %}
+  </section>
+  <section class="card">
+    <h2>Запросить выплату</h2>
+    <p class="hint">Кошелёк: {{ (user.wallet or 'не указан') | mask }}</p>
+    <form method="post" action="/me/payout" class="stack">
+      <input name="amount" placeholder="Сумма TON" required>
+      <button {% if not user.wallet %}disabled{% endif %}>Отправить заявку</button>
+    </form>
+  </section>
+</div>
+<section class="card">
+  <h2>Отчёты</h2>
+  <table>
+    <thead><tr><th>#</th><th>Задача</th><th>Статус</th><th>Дата</th></tr></thead>
+    <tbody>
+    {% for r in reports %}
+      <tr>
+        <td>{{ r.id }}</td>
+        <td class="mono">{{ r.deal_number }}</td>
+        <td><span class="tag {{ r.status }}">{{ r.status }}</span></td>
+        <td>{{ r.created_at | dt }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% if not reports %}<p class="empty">Отчётов нет — отправьте их через бота</p>{% endif %}
+</section>
+{% endblock %}

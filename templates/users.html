@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Сотрудники{% endblock %}
+{% block body %}
+<h1>Сотрудники</h1>
+<form class="search" method="get">
+  <input type="search" name="q" value="{{ q }}" placeholder="ID, username или имя">
+  <input type="hidden" name="archived" value="{{ archived }}">
+  <button>Найти</button>
+</form>
+<div class="tabs">
+  <a href="/users" class="{% if archived != '1' %}active{% endif %}">Активные</a>
+  <a href="/users?archived=1" class="{% if archived == '1' %}active{% endif %}">Архив</a>
+</div>
+<section class="card">
+  <table>
+    <thead><tr><th>ID</th><th>Имя</th><th>Статус</th><th>Ставка</th><th>Баланс</th><th>Заработано</th><th>Регистрация</th></tr></thead>
+    <tbody>
+    {% for u in users %}
+      <tr onclick="location='/users/{{ u.tg_id }}'">
+        <td class="mono">{{ u.tg_id }}</td>
+        <td>{% if u.username %}@{{ u.username }}{% else %}{{ u.first_name }}{% endif %}{% if u.is_banned %} <em>бан</em>{% endif %}</td>
+        <td>{{ u.status }}</td>
+        <td>{{ u.payout_percent | pct }}</td>
+        <td>{{ u.balance | money }}</td>
+        <td>{{ u.earned | money }}</td>
+        <td>{{ u.registered_at | dt }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% if not users %}<p class="empty">Никого не найдено</p>{% endif %}
+</section>
+{% endblock %}

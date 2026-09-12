@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Наставники{% endblock %}
+{% block body %}
+<h1>Наставники</h1>
+<div class="grid-2">
+  <section class="card">
+    <h2>Добавить</h2>
+    <form method="post" action="/mentors" class="stack">
+      <input name="name" placeholder="Имя" required>
+      <input name="username" placeholder="@username" required>
+      <input name="role" placeholder="Роль" value="Наставник">
+      <input name="sort_order" type="number" value="0" placeholder="Порядок">
+      <button>Добавить</button>
+    </form>
+  </section>
+  <section class="card">
+    <h2>Список</h2>
+    {% for m in mentors %}
+    <div class="mentor-row">
+      <div>
+        <b>{{ m.name }}</b>
+        <span>@{{ m.username }} · {{ m.role }}</span>
+      </div>
+      <form method="post" action="/mentors/{{ m.id }}/delete">
+        <button class="danger">Удалить</button>
+      </form>
+    </div>
+    {% else %}
+    <p class="empty">Наставников пока нет</p>
+    {% endfor %}
+  </section>
+</div>
+{% endblock %}

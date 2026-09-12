@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Выплаты{% endblock %}
+{% block body %}
+<h1>Лента выплат</h1>
+<p class="hint">Публичная лента подтверждённых выплат. Одобренные заявки попадают сюда автоматически.</p>
+<div class="grid-2">
+  <section class="card">
+    <h2>Добавить вручную</h2>
+    <form method="post" action="/payouts" class="stack">
+      <input name="username" placeholder="@username" required>
+      <input name="amount" placeholder="50" required>
+      <button>Добавить</button>
+    </form>
+  </section>
+  <section class="card">
+    <h2>Последние</h2>
+    {% for p in items %}
+    <div class="mentor-row">
+      <div>
+        <b>{{ p.username }}</b>
+        <span>{{ p.amount | money }} TON · {{ p.created_at | dt }}</span>
+      </div>
+      <form method="post" action="/payouts/{{ p.id }}/delete">
+        <button class="danger">Удалить</button>
+      </form>
+    </div>
+    {% else %}
+    <p class="empty">Выплат нет</p>
+    {% endfor %}
+  </section>
+</div>
+{% endblock %}

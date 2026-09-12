@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Настройки{% endblock %}
+{% block body %}
+<h1>Настройки</h1>
+<form method="post" class="card stack settings">
+  <label>Подпись главного меню</label>
+  <input name="welcome" value="{{ s.welcome }}">
+
+  <label>О проекте (HTML)</label>
+  <textarea name="about" rows="12">{{ s.about }}</textarea>
+
+  <div class="grid-2">
+    <div class="stack">
+      <label>Канал</label>
+      <input name="channel" value="{{ s.channel }}">
+    </div>
+    <div class="stack">
+      <label>Ссылка на чат (кнопка «Войти в чат»)</label>
+      <input name="chat" value="{{ s.chat }}" placeholder="https://t.me/+xxxx или @chat">
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="stack">
+      <label>Минимум вывода</label>
+      <input name="min_withdraw" value="{{ s.min_withdraw }}">
+    </div>
+    <div class="stack">
+      <label>Сеть</label>
+      <input name="network" value="{{ s.network }}">
+    </div>
+  </div>
+
+  <label>Адрес пополнения</label>
+  <input name="deposit_address" value="{{ s.deposit_address }}">
+
+  <label>Подсказка к пополнению</label>
+  <textarea name="deposit_hint" rows="4">{{ s.deposit_hint }}</textarea>
+
+  <button>Сохранить</button>
+</form>
+{% endblock %}

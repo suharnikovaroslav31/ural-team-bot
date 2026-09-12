@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Сотрудник {{ user.tg_id }}{% endblock %}
+{% block body %}
+<p class="crumb"><a href="/users">Сотрудники</a> / {{ user.tg_id }}</p>
+<h1>{% if user.username %}@{{ user.username }}{% else %}{{ user.first_name }}{% endif %}</h1>
+<section class="stats">
+  <article><span>Баланс</span><b>{{ user.balance | money }} TON</b></article>
+  <article><span>Заработано</span><b>{{ user.earned | money }} TON</b></article>
+  <article><span>Ставка</span><b>{{ user.payout_percent | pct }}</b></article>
+  <article><span>Рефералы</span><b>{{ refs }}</b></article>
+</section>
+<div class="grid-2">
+  <section class="card">
+    <h2>Начислить / списать</h2>
+    <form method="post" action="/users/{{ user.tg_id }}/balance" class="stack">
+      <input name="amount" placeholder="10 или -5" required>
+      <button>Изменить баланс</button>
+    </form>
+  </section>
+  <section class="card">
+    <h2>Профиль и комиссия</h2>
+    <form method="post" action="/users/{{ user.tg_id }}/profile" class="stack">
+      <input name="tag" value="{{ user.tag or 'Аноним' }}" placeholder="Тег">
+      <input name="mentor_percent" value="{{ user.mentor_percent }}" placeholder="Процент наставника">
+      <input name="payout_percent" value="{{ user.payout_percent }}" placeholder="Payout Rate %">
+      <input name="wallet" value="{{ user.wallet or '' }}" placeholder="TON-кошелёк">
+      <button>Сохранить</button>
+    </form>
+    <form method="post" action="/users/{{ user.tg_id }}/status" class="stack">
+      <input name="status" value="{{ user.status }}">
+      <button>Сохранить статус</button>
+    </form>
+    <div class="row-actions">
+    <form method="post" action="/users/{{ user.tg_id }}/ban">
+      {% if user.is_banned %}
+      <button name="banned" value="0">Разбанить</button>
+      {% else %}
+      <button class="danger" name="banned" value="1">Забанить</button>
+      {% endif %}
+    </form>
+    <form method="post" action="/users/{{ user.tg_id }}/archive">
+      {% if user.is_archived %}
+      <button name="archived" value="0">Из архива</button>
+      {% else %}
+      <button class="danger" name="archived" value="1">В архив</button>
+      {% endif %}
+    </form>
+    </div>
+  </section>
+</div>
+<div class="grid-2">
+  <section class="card">
+    <h2>Оценки NFT</h2>
+    {% for v in valuations %}
+    <div class="mentor-row">
+      <div>
+        <b>#{{ v.id }} {{ v.collection or 'NFT' }}</b>
+        <span>floor {{ v.floor_price | money4 }} · доля {{ v.employee_share | money4 }} TON</span>
+      </div>
+      {% if not v.credited %}
+      <form method="post" action="/valuations/{{ v.id }}/credit"><button>Зачислить</button></form>
+      {% else %}
+      <span class="tag approved">ok</span>
+      {% endif %}
+    </div>
+    {% else %}
+    <p class="empty">Нет оценок</p>
+    {% endfor %}
+  </section>
+  <section class="card">
+    <h2>Журнал</h2>
+    {% for l in logs %}
+    <div class="mentor-row">
+      <div>
+        <b>{{ l.title }}</b>
+        <span>{{ l.kind }} · {{ l.created_at | dt }}{% if l.amount %} · {{ l.amount | money }} TON{% endif %}</span>
+      </div>
+    </div>
+    {% else %}
+    <p class="empty">Пусто</p>
+    {% endfor %}
+  </section>
+</div>
+{% endblock %}

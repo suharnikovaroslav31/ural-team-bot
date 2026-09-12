@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Рассылка{% endblock %}
+{% block body %}
+<h1>Рассылка</h1>
+{% if result %}<div class="alert ok">{{ result }}</div>{% endif %}
+<form method="post" class="card stack">
+  <label>Текст (HTML)</label>
+  <textarea name="text" rows="10" required placeholder="Сообщение всем пользователям"></textarea>
+  <button>Отправить</button>
+</form>
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Обзор{% endblock %}
+{% block body %}
+<h1>Обзор</h1>
+<section class="stats">
+  <article><span>Сотрудники</span><b>{{ stats.users or 0 }}</b></article>
+  <article><span>Сегодня</span><b>{{ stats.today or 0 }}</b></article>
+  <article><span>На балансах</span><b>{{ (stats.balances or 0) | money }} TON</b></article>
+  <article><span>Заявки</span><b>{{ stats.pending or 0 }}</b></article>
+  <article><span>Выплачено</span><b>{{ (stats.paid or 0) | money }} TON</b></article>
+  <article><span>Открытые задачи</span><b>{{ stats.open_tasks or 0 }}</b></article>
+</section>
+<div class="grid-2">
+<section class="card">
+  <div class="card-head">
+    <h2>Ожидают выплаты</h2>
+    <a href="/withdrawals?status=pending">все заявки</a>
+  </div>
+  {% if pending %}
+  <table>
+    <thead><tr><th>#</th><th>Сотрудник</th><th>Сумма</th><th>Адрес</th><th></th></tr></thead>
+    <tbody>
+    {% for w in pending %}
+      <tr>
+        <td>{{ w.id }}</td>
+        <td>@{{ w.username or w.first_name }}</td>
+        <td>{{ w.amount | money }} TON</td>
+        <td class="mono">{{ w.address | mask }}</td>
+        <td class="row-actions">
+          <form method="post" action="/withdrawals/{{ w.id }}/decide"><button name="action" value="ok">Ок</button></form>
+          <form method="post" action="/withdrawals/{{ w.id }}/decide"><button class="danger" name="action" value="no">Нет</button></form>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty">Новых заявок нет</p>
+  {% endif %}
+</section>
+<section class="card">
+  <div class="card-head">
+    <h2>Пайплайн сделок</h2>
+    <a href="/deals">все</a>
+  </div>
+  {% for d in deals %}
+  <div class="mentor-row">
+    <div>
+      <b>{{ d.external_id }}</b>
+      <span>{{ d.title or '—' }} · {{ d.updated_at | dt }}</span>
+    </div>
+    <span class="tag {{ d.status }}">{{ d.status }}</span>
+  </div>
+  {% else %}
+  <p class="empty">Сделок пока нет</p>
+  {% endfor %}
+</section>
+</div>
+{% endblock %}

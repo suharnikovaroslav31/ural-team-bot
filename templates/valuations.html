@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Оценки NFT{% endblock %}
+{% block body %}
+<h1>Оценки NFT</h1>
+<section class="card">
+  <table>
+    <thead><tr><th>#</th><th>Сотрудник</th><th>Коллекция</th><th>Floor</th><th>Ставка</th><th>Доля</th><th>Дата</th><th></th></tr></thead>
+    <tbody>
+    {% for v in items %}
+      <tr>
+        <td>{{ v.id }}</td>
+        <td><a href="/users/{{ v.user_id }}">{{ v.user_id }}</a></td>
+        <td>{{ v.collection or '—' }}</td>
+        <td>{{ v.floor_price | money4 }}</td>
+        <td>{{ v.payout_rate | pct }}</td>
+        <td>{{ v.employee_share | money4 }}</td>
+        <td>{{ v.created_at | dt }}</td>
+        <td>
+          {% if not v.credited %}
+          <form method="post" action="/valuations/{{ v.id }}/credit"><button>Зачислить</button></form>
+          {% else %}
+          <span class="tag approved">зачислено</span>
+          {% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% if not items %}<p class="empty">Оценок нет</p>{% endif %}
+</section>
+{% endblock %}
