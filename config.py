@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from pydantic import Field, field_validator
+from pydantic import AliasChoices, Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 ROOT = Path(__file__).resolve().parent
@@ -49,6 +49,8 @@ class Settings(BaseSettings):
     payouts_topic_id: int = 0
 
     marketplace_secret: str = ""
+    # Bothost отдаёт публичный домен на порт из PORT, если включён веб-интерфейс.
+    api_port: int = Field(default=0, validation_alias=AliasChoices("api_port", "port"))
     default_payout_rate: float = 70.0
     min_withdraw: float = 0.1
 

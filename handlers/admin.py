@@ -19,7 +19,7 @@ import keyboards as kb
 import texts
 from database.crud import db
 from services.logger import notify_admins, notify_payout
-from services.marketplace import ingest_deal
+from services.marketplace import deal_card, deal_line, ingest_deal
 from ui import edit_screen, show_home
 
 log = logging.getLogger("admin")
@@ -864,6 +864,45 @@ async def cb_admin_payouts(call: CallbackQuery) -> None:
         lines.append(f"#{w.id} {escape(uname)} — <b>{texts.money(w.amount)} TON</b>")
     await call.answer()
     await edit_screen(call, "\n".join(lines), kb.admin_payouts_kb(rows[:8]))
+
+
+@router.callback_query(F.data == "adm:deals")
+async def cb_adm_deals(call: CallbackQuery) -> None:
+    if not _admin(call):
+        await call.answer("Нет доступа", show_alert=True)
+        return
+    rows = await db.deals(limit=15)
+    lines = [texts.header("🤝 Сделки")]
+    if rows:
+        lines.append("Сделки из бота GG Sel. Нажмите на сделку, чтобы открыть карточку.\n")
+        lines.extend(deal_line(deal) for deal in rows[:10])
+    else:
+        lines.append(
+            "Пока пусто.\n"
+            "Сделки появятся сами, как только в GG Sel пройдёт первая. "
+            "Если там сделки идут, а здесь тихо — проверьте PANEL_API_URL "
+            "и PANEL_API_SECRET в настройках GG Sel."
+        )
+    await call.answer()
+    await edit_screen(call, "\n".join(lines), kb.admin_deals_kb(rows))
+
+
+@router.callback_query(F.data.startswith("adm:deal:"))
+async def cb_adm_deal(call: CallbackQuery) -> None:
+    if not _admin(call):
+        await call.answer("Нет доступа", show_alert=True)
+        return
+    deal_id = int(call.data.split(":")[-1] or 0)
+    deal = await db.deal(deal_id)
+    if not deal:
+        await call.answer("Сделка не найдена", show_alert=True)
+        return
+    await call.answer()
+    await edit_screen(
+        call,
+        texts.header("🤝 Сделка") + deal_card(deal),
+        kb.admin_deal_kb(int(deal.user_id or 0)),
+    )
 
 
 @router.callback_query(F.data == "adm:mentors")

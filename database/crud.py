@@ -876,6 +876,15 @@ class Database:
             stmt = select(Deal).order_by(Deal.id.desc()).limit(limit)
             return list((await session.execute(stmt)).scalars().all())
 
+    async def deal(self, deal_id: int) -> Optional[Deal]:
+        async with session_scope() as session:
+            return await session.get(Deal, deal_id)
+
+    async def deal_by_external(self, external_id: str) -> Optional[Deal]:
+        async with session_scope() as session:
+            stmt = select(Deal).where(Deal.external_id == external_id.strip())
+            return (await session.execute(stmt)).scalars().first()
+
     async def report(self, report_id: int) -> Optional[TaskReport]:
         async with session_scope() as session:
             return await session.get(TaskReport, report_id)

@@ -55,13 +55,37 @@ def admin_kb() -> InlineKeyboardMarkup:
     kb.button(text="Воркеры", callback_data="aul:all", icon_custom_emoji_id=icon("people"))
     kb.button(text="Отчёты", callback_data="admin_reports", icon_custom_emoji_id=icon("report"))
     kb.button(text="Выводы", callback_data="admin_payouts", icon_custom_emoji_id=icon("money"))
-    kb.button(text="Наставники", callback_data="adm:mentors", icon_custom_emoji_id=icon("mentor"))
+    kb.button(text="Сделки", callback_data="adm:deals", icon_custom_emoji_id=icon("mentor"))
+    kb.button(text="Наставники", callback_data="adm:mentors", icon_custom_emoji_id=icon("people"))
     kb.button(text="Настройки", callback_data="adm:settings", icon_custom_emoji_id=icon("pen"))
     kb.button(text="Рассылка", callback_data="adm:bc", icon_custom_emoji_id=icon("megaphone"))
     kb.button(text="Кошелёк выплат", callback_data="adm:wallet", icon_custom_emoji_id=icon("card"))
     kb.button(text="Синхр. чат", callback_data="adm:sync", icon_custom_emoji_id=icon("lightning"))
     kb.button(text="В бот", callback_data="home", icon_custom_emoji_id=icon("back"))
-    kb.adjust(2, 2, 2, 2, 1)
+    kb.adjust(2, 2, 2, 2, 1, 1)
+    return kb.as_markup()
+
+
+def admin_deals_kb(rows) -> InlineKeyboardMarkup:
+    kb = InlineKeyboardBuilder()
+    kb.button(text="Обновить", callback_data="adm:deals", icon_custom_emoji_id=icon("lightning"))
+    shown = rows[:15]
+    for deal in shown:
+        flag = {"success": "✅", "error": "❌"}.get(deal.status, "⏳")
+        amount = f"{float(deal.amount):g}" if deal.amount is not None else "—"
+        kb.button(text=f"{flag} {deal.external_id} · {amount}"[:64], callback_data=f"adm:deal:{deal.id}")
+    kb.button(text="Назад", callback_data="admin_home", icon_custom_emoji_id=icon("back"))
+    kb.adjust(1, *([1] * len(shown)), 1)
+    return kb.as_markup()
+
+
+def admin_deal_kb(user_id: int = 0) -> InlineKeyboardMarkup:
+    kb = InlineKeyboardBuilder()
+    if user_id:
+        kb.button(text="Карточка воркера", callback_data=f"au:{user_id}", icon_custom_emoji_id=icon("person"))
+    kb.button(text="К списку", callback_data="adm:deals", icon_custom_emoji_id=icon("back"))
+    kb.button(text="В админку", callback_data="admin_home", icon_custom_emoji_id=icon("shield"))
+    kb.adjust(1)
     return kb.as_markup()
 
 

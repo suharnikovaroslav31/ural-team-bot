@@ -21,11 +21,15 @@ async def main() -> None:
 
     await db.connect()
     from bot import start_polling
+    from services.api import start_api
 
+    api = await start_api()
     logging.info("Бот запущен")
     try:
         await start_polling()
     finally:
+        if api is not None:
+            await api.cleanup()
         await db.close()
 
 

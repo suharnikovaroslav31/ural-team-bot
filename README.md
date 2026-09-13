@@ -54,10 +54,39 @@ python main.py
 - `/deal ID статус [сумма] [user_id]`
 - `/credit ID_оценки`
 
-## Marketplace webhook
+## Приём сделок из бота GG Sel
+
+Бот панели поднимает HTTP-приёмник, если задана переменная `PORT` (на Bothost её
+подставляет хостинг, когда у бота включён веб-интерфейс/домен). Сделки видны в
+`/admin` → «Сделки», финал сделки прилетает админам в личку.
+
+Настройка:
+
+1. В Bothost у бота панели включить веб-интерфейс (домен), порт оставить как в
+   настройках — приложение слушает `0.0.0.0:$PORT` само.
+2. В панели задать `MARKETPLACE_SECRET` — любой длинный пароль.
+3. В боте GG Sel задать `PANEL_API_URL` (домен панели) и `PANEL_API_SECRET`
+   (тот же пароль).
+
+Проверка домена: `GET https://<домен>/health` → `{"ok": true}`.
 
 ```
-POST /api/marketplace/deals
-X-Marketplace-Secret: ...
-{"id":"deal-1","status":"success","title":"...","amount":12.5,"user_id":123}
+POST /api/deals
+X-Api-Secret: <MARKETPLACE_SECRET>
+{
+  "source": "gg_sel",
+  "event": "completed",
+  "id": "abc123",
+  "status": "completed",
+  "deal_type": "gift",
+  "pay_method": "ton",
+  "amount": 12.5,
+  "description": "https://t.me/nft/PlushPepe-111",
+  "seller": {"id": 111, "username": "seller", "name": "Seller"},
+  "buyer": {"id": 222, "username": "buyer", "name": "Buyer"}
+}
 ```
+
+Этапы: `open` → `active` → `paid` → `goods_sent` → `completed`, отдельно
+`cancelled`. Опоздавшие события с прошлым этапом панель игнорирует.
+Старый путь `/api/marketplace/deals` с `X-Marketplace-Secret` тоже работает.
