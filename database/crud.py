@@ -885,6 +885,33 @@ class Database:
             stmt = select(Deal).where(Deal.external_id == external_id.strip())
             return (await session.execute(stmt)).scalars().first()
 
+    async def deal_counts(self, user_id: int) -> tuple[int, int]:
+        """Сколько сделок у человека: (успешных, всего)."""
+        async with session_scope() as session:
+            total = await session.scalar(
+                select(func.count(Deal.id)).where(Deal.user_id == user_id)
+            )
+            success = await session.scalar(
+                select(func.count(Deal.id)).where(
+                    and_(Deal.user_id == user_id, Deal.status == DealStatus.success.value)
+                )
+            )
+            return int(success or 0), int(total or 0)
+
+    async def deal_counts_map(self, user_ids: Any) -> dict[int, int]:
+        """Успешные сделки сразу по списку людей — для лидерборда."""
+        ids = [int(x) for x in user_ids if x]
+        if not ids:
+            return {}
+        async with session_scope() as session:
+            stmt = (
+                select(Deal.user_id, func.count(Deal.id))
+                .where(and_(Deal.user_id.in_(ids), Deal.status == DealStatus.success.value))
+                .group_by(Deal.user_id)
+            )
+            rows = (await session.execute(stmt)).all()
+            return {int(uid): int(count) for uid, count in rows if uid}
+
     async def report(self, report_id: int) -> Optional[TaskReport]:
         async with session_scope() as session:
             return await session.get(TaskReport, report_id)

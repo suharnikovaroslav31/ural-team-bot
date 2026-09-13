@@ -312,8 +312,13 @@ async def cb_lb_period(call: CallbackQuery) -> None:
     if period not in {"day", "week", "month", "all"}:
         period = "all"
     rows = await db.leaderboard(period)
+    deals = await db.deal_counts_map([getattr(row, "tg_id", 0) for row in rows])
     await call.answer()
-    await edit_screen(call, texts.leaderboard_text(rows, period), kb.leaderboard_result_kb())
+    await edit_screen(
+        call,
+        texts.leaderboard_text(rows, period, deals),
+        kb.leaderboard_result_kb(),
+    )
 
 
 @router.callback_query(F.data == "tasks")

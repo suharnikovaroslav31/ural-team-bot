@@ -129,18 +129,23 @@ def leaderboard_menu_text() -> str:
     return "📈 Лидерборд\nВыбери период."
 
 
-def leaderboard_text(rows: Any, period: str = "all") -> str:
+def leaderboard_text(rows: Any, period: str = "all", deals: Any = None) -> str:
     titles = {"day": "День", "week": "Неделя", "month": "Месяц", "all": "Все время"}
     title = titles.get(period, "Все время")
     if not rows:
         return f"📈 Лидерборд\nПериод: {title}\n\nПока нет данных."
+    counts = deals or {}
     medals = {0: "🥇", 1: "🥈", 2: "🥉"}
     lines = [f"📈 Лидерборд\nПериод: {title}\n"]
     for i, u in enumerate(rows):
         medal = medals.get(i, f"{i + 1}.")
         tag = escape(str(_row(u, "tag", "Аноним") or "Аноним").lstrip("#"))
         total = _row(u, "total", 0) or 0
-        lines.append(f"{medal} #{tag} — <b>{money(total)} TON</b>")
+        made = counts.get(int(_row(u, "tg_id", 0) or 0), 0)
+        suffix = f" · 🤝 {made}" if made else ""
+        lines.append(f"{medal} #{tag} — <b>{money(total)} TON</b>{suffix}")
+    if any(counts.values()):
+        lines.append("\n🤝 — успешные сделки в GG Sel за всё время.")
     return "\n".join(lines)
 
 
@@ -220,7 +225,7 @@ def nft_result_text(result: Any) -> str:
     )
 
 
-def staff_card_text(user: Any, *, paid: float = 0) -> str:
+def staff_card_text(user: Any, *, paid: float = 0, deals: tuple[int, int] = (0, 0)) -> str:
     uname = display_name(user)
     chat = "да" if _row(user, "in_main_chat") else "нет"
     wallet = (str(_row(user, "wallet", "") or "")).strip()
@@ -228,6 +233,8 @@ def staff_card_text(user: Any, *, paid: float = 0) -> str:
     status = str(_row(user, "status", "Воркер") or "Воркер")
     if status in {"Новый", "Кандидат", "Сотрудник"}:
         status = "Воркер"
+    success, total = deals
+    deals_line = f"🤝 Сделки: <b>{success}</b> успешных из {total}\n" if total else ""
     return (
         f"{header('👤 Воркер')}"
         f"{uname}\n"
@@ -239,6 +246,7 @@ def staff_card_text(user: Any, *, paid: float = 0) -> str:
         f"👥 Наставник: <b>{pct(_row(user, 'mentor_percent', 0))}</b>\n"
         f"💎 Баланс: <b>{money(_row(user, 'balance', 0))} TON</b>\n"
         f"📤 Выплачено: <b>{money4(paid)} TON</b>\n"
+        f"{deals_line}"
         f"🏷 Тег: #{escape(str(_row(user, 'tag', 'Аноним') or 'Аноним').lstrip('#'))}\n"
         f"👛 {wallet_s}"
     )

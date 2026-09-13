@@ -80,7 +80,7 @@ async def _show_staff_card(call: CallbackQuery, tg_id: int) -> None:
     paid = await db.paid_sum(tg_id)
     await edit_screen(
         call,
-        texts.staff_card_text(user, paid=paid),
+        texts.staff_card_text(user, paid=paid, deals=await db.deal_counts(tg_id)),
         kb.admin_staff_kb(
             tg_id,
             banned=bool(user.is_banned),
