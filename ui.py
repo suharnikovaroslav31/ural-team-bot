@@ -22,19 +22,6 @@ def banner_file() -> Optional[Path]:
             return path
     if config.BANNER_PATH.exists():
         return config.BANNER_PATH
-    uploaded = Path(
-        r"C:\Users\kraken\.cursor\projects\c-Users-kraken-Desktop-panel\assets"
-    )
-    if uploaded.exists():
-        matches = sorted(uploaded.glob("*01-46-00*.jpg")) or sorted(uploaded.glob("*.jpg"))
-        if matches:
-            dest = config.ASSETS / "banner.jpg"
-            try:
-                dest.parent.mkdir(parents=True, exist_ok=True)
-                dest.write_bytes(matches[0].read_bytes())
-                return dest
-            except OSError:
-                return matches[0]
     return None
 
 
