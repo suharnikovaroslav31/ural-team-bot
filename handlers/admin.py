@@ -95,7 +95,7 @@ async def _chat_url(message: Message) -> str:
         return f"https://t.me/{chat.username}"
     if context.bot:
         try:
-            link = await context.bot.create_chat_invite_link(chat.id, name="Ural Team")
+            link = await context.bot.create_chat_invite_link(chat.id, name="Shah Team")
             return link.invite_link
         except TelegramBadRequest:
             pass
@@ -108,21 +108,16 @@ def _topic_id(message: Message) -> int:
 
 
 async def _wallet_screen() -> tuple[str, bool]:
-    from services.ton_send import TonSendError, payouts_enabled, payout_address, payouts_ready_error, list_payout_addresses
+    from services.ton_send import TonSendError, payouts_enabled, payout_address, list_payout_addresses
 
-    hint = (
-        "Tonkeeper: 24 секретных слова пришлите <b>только в личку боту</b>. "
-        "Лучше отдельный кошелёк только для выплат."
-    )
     if not await payouts_enabled():
-        extra = await payouts_ready_error() or "Кошелёк выплат не подключён."
-        return texts.header("💳 Кошелёк выплат") + extra + "\n\n" + hint, False
+        return texts.header("💳 Кошелёк выплат"), False
     current = (await db.setting("ton_wallet_version", "auto")).strip().lower() or "auto"
     try:
         addr = await payout_address()
         variants = await list_payout_addresses()
     except TonSendError as exc:
-        return texts.header("💳 Кошелёк выплат") + escape(str(exc)) + "\n\n" + hint, True
+        return texts.header("💳 Кошелёк выплат") + escape(str(exc)), True
     lines = [
         texts.header("💳 Кошелёк выплат"),
         "Автовыплаты включены.",
@@ -271,8 +266,11 @@ async def cmd_bind(message: Message) -> None:
 async def cmd_payoutwallet(message: Message, state: FSMContext) -> None:
     if not _admin(message):
         return
-    await state.clear()
     text, connected = await _wallet_screen()
+    if not connected and message.chat.type == "private":
+        await state.set_state(WalletSeedSG.phrase)
+    else:
+        await state.clear()
     await message.answer(text, reply_markup=kb.admin_payout_wallet_kb(connected=connected))
 
 
@@ -1123,9 +1121,12 @@ async def cb_adm_wallet(call: CallbackQuery, state: FSMContext) -> None:
     if not _admin(call):
         await call.answer("Нет доступа", show_alert=True)
         return
-    await state.clear()
     await call.answer()
     text, connected = await _wallet_screen()
+    if not connected and call.message and call.message.chat.type == "private":
+        await state.set_state(WalletSeedSG.phrase)
+    else:
+        await state.clear()
     await edit_screen(call, text, kb.admin_payout_wallet_kb(connected=connected))
 
 
@@ -1139,15 +1140,7 @@ async def cb_adm_wallet_set(call: CallbackQuery, state: FSMContext) -> None:
         return
     await state.set_state(WalletSeedSG.phrase)
     await call.answer()
-    await edit_screen(
-        call,
-        texts.header("💳 Tonkeeper")
-        + "Пришлите <b>24 секретных слова</b> одним сообщением в эту личку.\n\n"
-        "Это сид кошелька, с которого будут уходить выплаты. "
-        "После отправки удалите сообщение у себя в чате.\n"
-        "Отмена — кнопка Назад.",
-        kb.back_kb(home="adm:wallet"),
-    )
+    await edit_screen(call, texts.header("💳 Кошелёк выплат"), kb.back_kb(home="adm:wallet"))
 
 
 @router.callback_query(F.data == "adm:wallet:off")

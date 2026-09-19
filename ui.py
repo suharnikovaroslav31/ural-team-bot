@@ -65,7 +65,7 @@ async def _send_home(chat_id: int, user_id: int, caption: str, *, fresh: bool = 
 
 
 async def show_home(target: Message | CallbackQuery, *, new: bool = False) -> None:
-    caption = await db.setting("welcome", "🏠 Ural Team")
+    caption = await db.setting("welcome", "Shah Team")
     user_id = target.from_user.id if target.from_user else 0
     markup = home_markup(user_id)
     if isinstance(target, CallbackQuery):
@@ -92,7 +92,7 @@ async def show_home(target: Message | CallbackQuery, *, new: bool = False) -> No
 
 
 async def send_menu(chat_id: int, user_id: int = 0) -> None:
-    caption = await db.setting("welcome", "🏠 Ural Team")
+    caption = await db.setting("welcome", "Shah Team")
     await _send_home(chat_id, user_id, caption)
 
 

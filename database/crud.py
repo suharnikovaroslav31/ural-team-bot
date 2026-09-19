@@ -31,8 +31,8 @@ from database.session import session_scope
 
 DEFAULTS: dict[str, str] = {
     "about": (
-        "ⓘ <b>Ural Team</b>\n\n"
-        "<b>Ural Team</b> — команда в сфере <b>NFT-ворка</b>.\n\n"
+        "ⓘ <b>Shah Team</b>\n\n"
+        "<b>Shah Team</b> — команда в сфере <b>NFT-ворка</b>.\n\n"
         "⚙️ Своя панель с выплатами.\n"
         "👥 Подготовленные OTC-боты для ворка.\n"
         "📊 Парсер для работы по маркету, китайцам и RU.\n"
@@ -46,7 +46,7 @@ DEFAULTS: dict[str, str] = {
     "network": "TON",
     "deposit_address": "",
     "deposit_hint": "Переведите средства на указанный адрес и нажмите «Я оплатил». Админ зачислит баланс вручную.",
-    "welcome": "🏠 Ural Team",
+    "welcome": "Shah Team",
     "main_chat_id": "0",
     "main_chat_title": "",
     "payouts_chat_id": "0",
@@ -101,7 +101,10 @@ class Database:
                 if exists is None:
                     session.add(Setting(key=key, value=value))
                 elif key in {"welcome", "about"} and (
-                    "Poltavsk" in (exists.value or "") or "полтавск" in (exists.value or "").lower()
+                    "Ural Team" in (exists.value or "")
+                    or "URAL TEAM" in (exists.value or "")
+                    or "Poltavsk" in (exists.value or "")
+                    or "полтавск" in (exists.value or "").lower()
                 ):
                     exists.value = value
 

@@ -161,7 +161,7 @@ async def notify_deal(
         lines.append(f"👤 воркер <code>{user_id}</code>")
     if not settings.deals_chat_id or settings.deals_topic_id <= 1:
         return
-    text = card("Ural Team · DEAL", lines)
+    text = card("Shah Team · DEAL", lines)
     await send_text(bot, settings.deals_chat_id, text, topic_id=settings.deals_topic_id)
 
 

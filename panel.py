@@ -38,7 +38,7 @@ def read_employee_token(token: str, max_age: int = 60 * 60 * 24 * 7) -> Optional
 
 
 def create_app() -> FastAPI:
-    app = FastAPI(title="Ural Team Panel", docs_url=None, redoc_url=None)
+    app = FastAPI(title="Shah Team Panel", docs_url=None, redoc_url=None)
     templates = Jinja2Templates(directory=str(config.TEMPLATES))
     templates.env.filters["money"] = texts.money
     templates.env.filters["money4"] = texts.money4

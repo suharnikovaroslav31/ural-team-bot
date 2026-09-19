@@ -31,6 +31,7 @@ router = Router(name="employee")
 TAG_RE = re.compile(r"^[A-Za-zА-Яа-яЁё0-9_]{1,24}$")
 TON_FRIENDLY = re.compile(r"^(?:EQ|UQ|kQ|0Q)[A-Za-z0-9_-]{46}$")
 TON_RAW = re.compile(r"^0:[a-fA-F0-9]{64}$")
+GIFT_RE = re.compile(r"^(?:https://)?t\.me/nft/[A-Za-z0-9_\-]+$", re.IGNORECASE)
 
 
 class WithdrawSG(StatesGroup):
@@ -411,8 +412,12 @@ async def report_deal(message: Message, state: FSMContext) -> None:
     if not await guard(message):
         return
     deal = (message.text or "").strip()
-    if not deal or len(deal) > 64 or "\n" in deal:
-        await message.answer("Укажи номер сделки одним сообщением.")
+    if deal.startswith("http://"):
+        deal = "https://" + deal[len("http://") :]
+    if deal.startswith("t.me/"):
+        deal = "https://" + deal
+    if not GIFT_RE.match(deal) or len(deal) > 200:
+        await message.answer("Нужна ссылка на подарок: <code>https://t.me/nft/Name-123</code>")
         return
     await state.update_data(deal=deal, shots=[])
     await state.set_state(ReportSG.screens)
@@ -425,7 +430,7 @@ async def report_deal(message: Message, state: FSMContext) -> None:
 
 @router.message(ReportSG.deal)
 async def report_deal_wrong(message: Message) -> None:
-    await message.answer("📄 Укажи номер сделки для выплаты.")
+    await message.answer("🎁 Пришли ссылку на подарок.")
 
 
 @router.message(ReportSG.screens, F.photo)
@@ -453,10 +458,7 @@ async def report_shot(message: Message, state: FSMContext) -> None:
     shots.append(fid)
     await state.update_data(shots=shots)
     n = len(shots)
-    if n < 2:
-        await message.answer(f"Нужно ещё минимум {2 - n}.")
-        return
-    await asyncio.sleep(2.2)
+    await asyncio.sleep(1.2)
     data = await state.get_data()
     if await state.get_state() != ReportSG.screens.state:
         return
@@ -473,20 +475,17 @@ async def report_shot_doc(message: Message, state: FSMContext) -> None:
         return
     doc = message.document
     if not doc or not (doc.mime_type or "").startswith("image/"):
-        await message.answer("📋 Загрузи от 2 до 10 скриншотов.")
+        await message.answer("📋 Пришли минимум 1 фото.")
         return
     data = await state.get_data()
     shots = list(data.get("shots") or [])
     shots.append(doc.file_id)
     await state.update_data(shots=shots[:10])
     n = len(shots)
-    if n < 2:
-        await message.answer(f"Нужно ещё минимум {2 - n}.")
-        return
     if n >= 10:
         await finish_report(message, state, data.get("deal", ""), shots[:10])
         return
-    await asyncio.sleep(2.2)
+    await asyncio.sleep(1.2)
     data = await state.get_data()
     if await state.get_state() != ReportSG.screens.state:
         return
@@ -497,7 +496,7 @@ async def report_shot_doc(message: Message, state: FSMContext) -> None:
 
 @router.message(ReportSG.screens)
 async def report_shot_wrong(message: Message) -> None:
-    await message.answer("📋 Загрузи от 2 до 10 скриншотов.")
+    await message.answer("📋 Пришли минимум 1 фото.")
 
 
 async def finish_report(message: Message, state: FSMContext, deal: str, shots: list[str]) -> None:
@@ -505,8 +504,8 @@ async def finish_report(message: Message, state: FSMContext, deal: str, shots: l
     for fid in shots:
         if fid not in unique:
             unique.append(fid)
-    if len(unique) < 2:
-        await message.answer("Нужно от 2 до 10 скриншотов.")
+    if len(unique) < 1:
+        await message.answer("Нужно минимум 1 фото.")
         return
     unique = unique[:10]
     await state.clear()
@@ -515,7 +514,7 @@ async def finish_report(message: Message, state: FSMContext, deal: str, shots: l
     uname = f"@{user.username}" if user.username else user.full_name
     caption = (
         f"📨 Отчёт #{rid}\n"
-        f"📌 Задача: <code>{escape(deal)}</code>\n"
+        f"🎁 Подарок: {escape(deal)}\n"
         f"👤 {escape(uname)}\n"
         f"🆔 <code>{user.id}</code>\n"
         f"🖼 Файлов: {len(unique)}"

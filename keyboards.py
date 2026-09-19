@@ -32,17 +32,15 @@ def _chat_url(raw: str) -> str | None:
 def main_kb(*, admin: bool = False) -> InlineKeyboardMarkup:
     kb = InlineKeyboardBuilder()
     kb.button(text="Профиль", callback_data="profile", icon_custom_emoji_id=icon("person"))
-    kb.button(text="О проекте", callback_data="about", icon_custom_emoji_id=icon("question"))
     kb.button(text="Кошелек", callback_data="wallet", icon_custom_emoji_id=icon("wallet"))
     kb.button(text="Наставники", callback_data="mentors", icon_custom_emoji_id=icon("mentor"))
     kb.button(text="Лидерборд", callback_data="leaderboard", icon_custom_emoji_id=icon("chart"))
     kb.button(text="Выплаты", callback_data="payouts", icon_custom_emoji_id=icon("money"))
-    kb.button(text="Вывод", callback_data="withdraw", icon_custom_emoji_id=icon("ton"))
     if admin:
         kb.button(text="Админ", callback_data="admin_home", icon_custom_emoji_id=icon("shield"))
-        kb.adjust(2, 2, 2, 1, 1)
+        kb.adjust(2, 2, 1, 1)
     else:
-        kb.adjust(2, 2, 2, 1)
+        kb.adjust(2, 2, 1)
     return kb.as_markup()
 
 
@@ -184,8 +182,6 @@ def admin_payout_wallet_kb(*, connected: bool) -> InlineKeyboardMarkup:
         kb.button(text="Как в Tonkeeper: v4", callback_data="adm:wver:v4r2", icon_custom_emoji_id=icon("ok"))
         kb.button(text="Сменить Tonkeeper", callback_data="adm:wallet:set", icon_custom_emoji_id=icon("lightning"))
         kb.button(text="Отключить", callback_data="adm:wallet:off", icon_custom_emoji_id=icon("no"))
-    else:
-        kb.button(text="Подключить Tonkeeper", callback_data="adm:wallet:set", icon_custom_emoji_id=icon("link"))
     kb.button(text="Назад", callback_data="admin_home", icon_custom_emoji_id=icon("back"))
     kb.adjust(1)
     return kb.as_markup()

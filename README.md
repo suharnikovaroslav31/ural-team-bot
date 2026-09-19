@@ -1,4 +1,4 @@
-# Ural Team
+# Shah Team
 
 Telegram-бот учёта задач, агентских комиссий и выплат в TON (Aiogram 3 + SQLite/PostgreSQL).
 

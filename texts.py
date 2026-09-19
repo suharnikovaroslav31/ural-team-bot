@@ -42,7 +42,7 @@ def _row(user: Any, key: str, default: Any = None) -> Any:
 
 
 def header(title: str) -> str:
-    return f"🔱 <b>Ural Team</b>\n{HR}\n<b>{title}</b>\n"
+    return f"🔱 <b>Shah Team</b>\n{HR}\n<b>{title}</b>\n"
 
 
 def profile_text(user: Any, mentor: str, paid: float, currency: str = "TON") -> str:
@@ -150,11 +150,11 @@ def leaderboard_text(rows: Any, period: str = "all", deals: Any = None) -> str:
 
 
 def payouts_deal_text() -> str:
-    return "📄 Укажи номер сделки для выплаты."
+    return "🎁 Пришли ссылку на подарок.\nФормат: <code>https://t.me/nft/Name-123</code>"
 
 
 def payouts_screens_text() -> str:
-    return "📋 Загрузи от 2 до 10 скриншотов."
+    return "📋 Пришли минимум 1 фото сделки."
 
 
 def fmt_min(value: Any) -> str:

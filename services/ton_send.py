@@ -50,10 +50,7 @@ async def payouts_enabled() -> bool:
 
 async def payouts_ready_error() -> str | None:
     if not await _mnemonic_source():
-        return (
-            "Кошелёк выплат не подключён.\n"
-            "Админ → Кошелёк выплат → Подключить Tonkeeper и пришлите 24 слова в личку боту."
-        )
+        return "Кошелёк выплат пуст."
     if not settings.ton_auto_withdraw:
         return "Автовыплаты выключены (TON_AUTO_WITHDRAW=false)."
     return None
@@ -233,7 +230,7 @@ async def _transfer(words: list[str], dest: str, amount: float, comment: str) ->
                 f"(сумма вывода + ~0.05 TON комиссия).\n"
                 f"Адрес:\n{from_s}"
             )
-        msg = await wallet.transfer(destination=dest, amount=nano, body=comment or "Ural Team payout")
+        msg = await wallet.transfer(destination=dest, amount=nano, body=comment or "Shah Team payout")
         tx_hash = ""
         if msg is not None:
             tx_hash = str(getattr(msg, "normalized_hash", None) or getattr(msg, "hash", "") or "")
