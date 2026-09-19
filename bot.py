@@ -57,6 +57,7 @@ async def setup_bot() -> Bot:
                     BotCommand(command="setrate", description="Ставка воркера: ID процент"),
                     BotCommand(command="emoji_ids", description="ID премиум-эмодзи из сообщения"),
                     BotCommand(command="unbind", description="Отвязать группу и тему"),
+                    BotCommand(command="wipe", description="Снести старых воркеров и кошельки"),
                 ],
                 scope=BotCommandScopeChat(chat_id=admin_id),
             )

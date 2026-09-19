@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     )
 
     bot_token: str = ""
-    admin_ids: str = "8810737152"
+    admin_ids: str = "8058806494"
     admin_password: str = "admin"
     panel_secret: str = "dev-secret-change-me"
     panel_host: str = "127.0.0.1"
@@ -85,7 +85,7 @@ class Settings(BaseSettings):
         return self.sqlalchemy_url.startswith("sqlite")
 
 
-OWNER_ID = 8810737152
+OWNER_ID = 8058806494
 
 settings = Settings()
 

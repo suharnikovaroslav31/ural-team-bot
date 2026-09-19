@@ -20,6 +20,13 @@ async def main() -> None:
         return
 
     await db.connect()
+    wiped = await db.maybe_reset_team(config.ADMIN_IDS, f"owner-{config.OWNER_ID}")
+    if wiped:
+        logging.info(
+            "Сброс состава: удалено воркеров %s, кошельков очищено %s",
+            wiped["removed"],
+            wiped["wallets"],
+        )
     from bot import start_polling
     from services.api import start_api
 

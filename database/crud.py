@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 from typing import Any, Optional
 
-from sqlalchemy import Select, String, and_, cast, func, or_, select
+from sqlalchemy import Select, String, and_, cast, delete, func, or_, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import selectinload
 
@@ -334,6 +334,62 @@ class Database:
         await self.set_setting("main_chat_title", "")
         await self.set_setting("payouts_chat_id", "0")
         await self.set_setting("payouts_topic_id", "0")
+
+    async def reset_team(self, keep_ids: set[int]) -> dict[str, int]:
+        """Снести старых воркеров и все кошельки. Админов из keep_ids оставить."""
+        keep = {int(x) for x in keep_ids if int(x) > 0}
+        async with session_scope() as session:
+            removed = 0
+            if keep:
+                gone = (
+                    await session.execute(select(func.count()).select_from(User).where(User.tg_id.notin_(keep)))
+                ).scalar() or 0
+                removed = int(gone)
+                stale = User.tg_id.notin_(keep)
+                await session.execute(delete(CommissionRate).where(CommissionRate.user_id.notin_(keep)))
+                await session.execute(delete(PayoutRequest).where(PayoutRequest.user_id.notin_(keep)))
+                await session.execute(delete(NFTValuation).where(NFTValuation.user_id.notin_(keep)))
+                await session.execute(delete(Earning).where(Earning.user_id.notin_(keep)))
+                await session.execute(delete(TaskReport).where(TaskReport.user_id.notin_(keep)))
+                await session.execute(delete(DepositTicket).where(DepositTicket.user_id.notin_(keep)))
+                await session.execute(delete(TransactionLog).where(TransactionLog.user_id.notin_(keep)))
+                await session.execute(update(Task).where(Task.assigned_to.notin_(keep)).values(assigned_to=None))
+                await session.execute(update(Deal).where(Deal.user_id.notin_(keep)).values(user_id=None))
+                await session.execute(delete(User).where(stale))
+            wallets = int(
+                (await session.execute(select(func.count()).select_from(User).where(User.wallet.is_not(None)))).scalar()
+                or 0
+            )
+            await session.execute(
+                update(User).values(
+                    wallet=None,
+                    balance=_dec(0),
+                    earned=_dec(0),
+                    in_main_chat=False,
+                )
+            )
+            await session.execute(delete(PayoutRequest))
+            await session.execute(delete(PayoutFeed))
+            for key, value in (
+                ("ton_wallet_mnemonic", ""),
+                ("ton_wallet_version", "auto"),
+                ("deposit_address", ""),
+            ):
+                row = await session.get(Setting, key)
+                if row:
+                    row.value = value
+                else:
+                    session.add(Setting(key=key, value=value))
+        return {"removed": removed, "wallets": wallets}
+
+    async def maybe_reset_team(self, keep_ids: set[int], token: str) -> Optional[dict[str, int]]:
+        """Один раз после смены владельца: старый состав и кошельки сбрасываются."""
+        marker = (await self.setting("staff_reset_token", "")).strip()
+        if marker == token:
+            return None
+        stats = await self.reset_team(keep_ids)
+        await self.set_setting("staff_reset_token", token)
+        return stats
 
     async def set_tag(self, tg_id: int, tag: str) -> None:
         async with session_scope() as session:

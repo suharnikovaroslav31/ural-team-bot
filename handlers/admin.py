@@ -220,6 +220,20 @@ async def cmd_admin(message: Message) -> None:
     await message.answer(await _admin_home_text(), reply_markup=kb.admin_kb())
 
 
+@router.message(Command("wipe"))
+async def cmd_wipe(message: Message) -> None:
+    if not _admin(message):
+        return
+    stats = await db.reset_team(config.ADMIN_IDS)
+    await db.set_setting("staff_reset_token", f"owner-{config.OWNER_ID}")
+    await message.answer(
+        texts.header("🧹 Сброс")
+        + f"Воркеров удалено: <b>{stats['removed']}</b>\n"
+        "Кошельки воркеров, кошелёк выплат и адрес депозита очищены.\n"
+        "Новые люди появятся после <code>/bind</code> в группе."
+    )
+
+
 @router.callback_query(F.data == "admin_home")
 async def cb_admin_home(call: CallbackQuery, state: FSMContext) -> None:
     if not _admin(call):
