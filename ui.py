@@ -25,8 +25,8 @@ def banner_file() -> Optional[Path]:
     return None
 
 
-def banner_input():
-    if context.banner_file_id:
+def banner_input(*, fresh: bool = False):
+    if not fresh and context.banner_file_id:
         return context.banner_file_id
     path = banner_file()
     if path is not None:
@@ -43,11 +43,19 @@ def home_markup(user_id: int):
     return kb.main_kb(admin=config.is_admin(user_id))
 
 
-async def _send_home(chat_id: int, user_id: int, caption: str):
+async def _send_home(chat_id: int, user_id: int, caption: str, *, fresh: bool = False):
     if context.bot is None:
         return
-    photo = banner_input()
     markup = home_markup(user_id)
+    if fresh:
+        context.banner_file_id = None
+        old_id = context.menu_ids.pop(chat_id, None)
+        if old_id:
+            try:
+                await context.bot.delete_message(chat_id, old_id)
+            except TelegramBadRequest:
+                pass
+    photo = banner_input(fresh=fresh)
     if photo is not None:
         sent = await context.bot.send_photo(chat_id, photo=photo, caption=caption, reply_markup=markup)
         await remember_banner(sent)
@@ -77,7 +85,7 @@ async def show_home(target: Message | CallbackQuery, *, new: bool = False) -> No
         return
 
     if new:
-        await _send_home(target.chat.id, user_id, caption)
+        await _send_home(target.chat.id, user_id, caption, fresh=True)
         return
 
     await send_menu(target.chat.id, user_id)
